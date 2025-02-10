@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct BottomActionButton: View {
-    @Binding var tap: (() -> Void)
-    
     let title: String
     
     var font: Font = .system(size: 24, weight: .bold)
     var foregroundColor: Color = .white
     var backgroundColor: Color = .red
     var cornerRadioius: CGFloat = 20
+    
+    @Binding var tap: (() -> Void)
     
     var body: some View {
         Button(title) {
@@ -31,5 +31,5 @@ struct BottomActionButton: View {
 }
 
 #Preview {
-    BottomActionButton(tap: .constant { print("buton tapped") }, title: "Start-Mock")
+    BottomActionButton(title: "Start-Mock", tap: .constant { print("buton tapped") })
 }
