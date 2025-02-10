@@ -15,7 +15,7 @@ struct BottomActionButton: View {
     var backgroundColor: Color = .red
     var cornerRadioius: CGFloat = 20
     
-    @Binding var tap: (() -> Void)
+    let tap: (() -> Void)
     
     var body: some View {
         Button(title) {
@@ -31,5 +31,5 @@ struct BottomActionButton: View {
 }
 
 #Preview {
-    BottomActionButton(title: "Start-Mock", tap: .constant { print("buton tapped") })
+    BottomActionButton(title: "Start-Mock", tap: { print("buton tapped") })
 }
