@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct Word: Identifiable, Equatable {
+struct Word: Identifiable, Hashable {
     let id = UUID()
     let text: String
     var offSetX: CGFloat = 0

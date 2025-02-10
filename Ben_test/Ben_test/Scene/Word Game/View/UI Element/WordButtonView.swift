@@ -14,7 +14,8 @@ struct WordButtonView: View {
     var body: some View {
         Button(action: tapAction) {
             Text(word.text)
-                .padding(.horizontal, 16)
+                .font(Font.system(size: 12, weight: .bold))
+                .padding(.horizontal, 8)
                 .padding(.vertical, 8)
                 .foregroundColor(.white)
                 .background(Color.blue)
