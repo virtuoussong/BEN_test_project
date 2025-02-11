@@ -16,4 +16,5 @@ struct Word: Identifiable, Hashable {
     var color: Color = .orange
     var isHidden = false
     var isTapped = false
+    var isAnimating = false
 }

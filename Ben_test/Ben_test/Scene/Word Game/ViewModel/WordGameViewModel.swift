@@ -13,7 +13,7 @@ final class WordGameViewModel: ObservableObject {
     @Published var finishedWords: [[Word]] = []
     @Published var capturedWords: [Word] = []
     private var animationTimers: [UUID: Timer] = [:]
-    
+    private var activeSectionsCount: Int = 0
     let synthesizer: WordSynthesizing
     let wordsArray: [[String]]
     var screenWidth: CGFloat = 0
@@ -33,32 +33,53 @@ final class WordGameViewModel: ObservableObject {
     }
     
     func startAnimation() {
-        for sectionIndex in words.indices {
-            for wordIndex in words[sectionIndex].indices {
-                var word = words[sectionIndex][wordIndex]
+        activeSectionsCount = 0
+        startListening()
+        
+        for section in words.indices {
+            if words[section].contains(where: { !$0.isHidden && !$0.isTapped }) {
+                activeSectionsCount += 1
+                animateWord(section)
+            }
+        }
+    }
+    
+    func animateWord(_ section: Int) {
+        if let wordIndex = words[section].firstIndex(
+            where: { !$0.isHidden && !$0.isTapped && !$0.isAnimating }
+        ) {
+            var word = words[section][wordIndex]
+            word.isAnimating = true
+            word.color = .blue
+            
+            withTransaction(Transaction(animation: nil)) {
+                words[section][wordIndex] = word
+            }
+            
+            words[section][wordIndex].offSetX = screenWidth - 150
+            
+            let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
                 
-                withTransaction(Transaction(animation: nil)) {
-                    word.color = .blue
-                    words[sectionIndex][wordIndex] = word
-                }
-                
-                word.offSetX = screenWidth - 150
-                words[sectionIndex][wordIndex] = word
-                
-                let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
-                    guard let self else { return }
+                if let currentIndex = self.words[section].firstIndex(where: { $0.id == word.id }) {
+                    var finishedWord = self.words[section][currentIndex]
 
-                    if let currentIndex = self.words[sectionIndex].firstIndex(where: { $0.id == word.id }) {
-                        let finishedWord = self.words[sectionIndex][currentIndex]
-                        
-                        if !finishedWord.isTapped {
-                            finishedWords[sectionIndex].append(finishedWord)
-                            self.words[sectionIndex][currentIndex].isHidden = true
-                        }
+                    if !finishedWord.isTapped {
+                        finishedWord.isHidden = true
+                        finishedWord.isAnimating = false
+                        self.finishedWords[section].append(finishedWord)
+                        self.words[section][currentIndex] = finishedWord
                     }
                 }
-                
-                animationTimers[word.id] = timer
+
+                self.animateWord(section)
+            }
+            animationTimers[word.id] = timer
+            
+        } else {
+            activeSectionsCount -= 1
+            if activeSectionsCount <= 0 {
+                stopListening()
             }
         }
     }
@@ -71,10 +92,13 @@ final class WordGameViewModel: ObservableObject {
         animationTimers.removeAll()
         finishedWords.removeAll()
         finishedWords = Array(repeating: [], count: words.count)
+        capturedWords.removeAll()
         words = wordsArray.map(generateWords)
     }
     
     func handleTapWord(_ tappedWord: Word) {
+        guard tappedWord.isAnimating else { return }
+        
         if let timer = animationTimers[tappedWord.id] {
             timer.invalidate()
             animationTimers.removeValue(forKey: tappedWord.id)
@@ -103,5 +127,13 @@ final class WordGameViewModel: ObservableObject {
     
     func setScreenWidth(_ width: CGFloat) {
         self.screenWidth = width
+    }
+    
+    func startListening() {
+        print("Started listening for speech input...")
+    }
+        
+    func stopListening() {
+        print("Stopped listening for speech input.")
     }
 }

@@ -20,7 +20,7 @@ struct WordListView: View {
                                 WordButtonView(word: $word) {
                                     viewModel.handleTapWord(word)
                                 }
-                                .frame(maxWidth: .infinity,alignment: .leading)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .listRowInsets(EdgeInsets())
                             }
                         }
@@ -42,6 +42,7 @@ struct WordListView: View {
             .onAppear {
                 viewModel.setScreenWidth(geometry.size.width)
             }
+            
         }
     }
 }
