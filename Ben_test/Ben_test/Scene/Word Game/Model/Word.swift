@@ -14,4 +14,6 @@ struct Word: Identifiable, Hashable {
     var offSetX: CGFloat = 0
     var animationDuration: Double = 0
     var color: Color = .orange
+    var isHidden = false
+    var isTapped = false
 }

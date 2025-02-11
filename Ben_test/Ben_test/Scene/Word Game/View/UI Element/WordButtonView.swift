@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WordButtonView: View {
-    let word: Word
+    @Binding var word: Word
     let tapAction: () -> Void
     
     var body: some View {
@@ -18,14 +18,16 @@ struct WordButtonView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
                 .foregroundColor(.white)
-                .background(Color.blue)
+                .background(word.color)
                 .cornerRadius(8)
         }
         .offset(x: word.offSetX, y: 0)
         .animation(.linear(duration: word.animationDuration), value: word.offSetX)
+        .opacity(word.isHidden ? 0 : 1)
+        .allowsHitTesting(!word.isHidden)
     }
 }
 
 #Preview {
-    WordButtonView(word: Word(text: "hi"), tapAction: { })
+    WordButtonView(word: .constant(Word(text: "hi")), tapAction: { })
 }

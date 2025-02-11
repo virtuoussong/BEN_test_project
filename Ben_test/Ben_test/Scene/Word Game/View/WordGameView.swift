@@ -17,7 +17,11 @@ struct WordGameView: View {
     
     var body: some View {
         VStack() {
-            WordListView()
+            HStack {
+                WordListView()
+            }
+            .padding(.horizontal, 8)
+            
             Spacer()
             WordGameBottomButtonView()
                 .padding(.horizontal, 16)
