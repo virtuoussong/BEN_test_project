@@ -18,10 +18,14 @@ struct WordGameView: View {
     var body: some View {
         VStack() {
             WordListView()
-            Spacer()
+            
+            WordScapeCapuredListView(words: $viewModel.capturedWords)
+                .frame(alignment: .topLeading)
+            
             WordGameBottomButtonView()
-                .padding(.horizontal, 16)
+                
         }
+        .padding(.horizontal, 8)
         .environmentObject(viewModel)
     }
 }

@@ -11,19 +11,38 @@ struct WordListView: View {
     @EnvironmentObject var viewModel: WordGameViewModel
     
     var body: some View {
-        VStack {
-            ForEach(viewModel.words, id: \.self) { section in
-                VStack {
-                    ForEach(section, id: \.self) { word in
-                        WordButtonView(word: word) {
-                            viewModel.handleTapWord(word)
+        GeometryReader { geometry in
+            VStack(spacing: 24) {
+                ForEach(viewModel.words.indices, id: \.self) { sectionIndex in
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach($viewModel.words[sectionIndex]) { $word in
+                                WordButtonView(word: $word) {
+                                    viewModel.handleTapWord(word)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .listRowInsets(EdgeInsets())
+                            }
                         }
-                        .frame(maxWidth: .infinity,alignment: .leading)
-                        .listRowInsets(EdgeInsets())
+                        
+                        VStack(alignment: .trailing, spacing: 8) {
+                            ForEach($viewModel.finishedWords[sectionIndex]) { $word in
+                                Text(word.text)
+                                    .font(Font.system(size: 12, weight: .bold))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 8)
+                                    .foregroundColor(.white)
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
+                            }
+                        }
                     }
                 }
-                .padding(.bottom, 24)
             }
+            .onAppear {
+                viewModel.setScreenWidth(geometry.size.width)
+            }
+            
         }
     }
 }
