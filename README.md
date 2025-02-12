@@ -50,8 +50,8 @@ graph TD
     A[WordGameView]
     B[WordListView]
     C[WordGameViewModel]
-    D[SpeechRecognizer\n(SpeechRecognizing)]
-    E[WordSynthesizer\n(WordSynthesizing)]
+    D["SpeechRecognizer<br>(SpeechRecognizing)"]
+    E["WordSynthesizer<br>(WordSynthesizing)"]
     F[Word Model]
     
     A --> B
@@ -62,3 +62,4 @@ graph TD
     D -- Publishes recognized word --> C
     C -- Calls "speak" --> E
     C -- Updates state & animations --> F
+
