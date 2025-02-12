@@ -10,22 +10,31 @@ import SwiftUI
 import Combine
 
 final class WordGameViewModel: ObservableObject {
+    
+    // MARK: - Published Properties
+
     @Published var words: [[Word]] = []
     @Published var finishedWords: [[Word]] = []
     @Published var capturedWords: Set<Word> = []
     
-    private var animationTimers: [UUID: Timer] = [:]
-    private var activeSectionsCount: Int = 0
+    // MARK: - Dependencies & State
     
-    let wordsArray: [[String]]
-    var screenWidth: CGFloat = 0
-    
-    let synthesizer: WordSynthesizing
-    let speechListener: SpeechRecognizing
-    
+    private let wordsArray: [[String]]
+    private(set) var screenWidth: CGFloat = 0
+    private let synthesizer: WordSynthesizing
+    private let speechListener: SpeechRecognizing
     private var cancellables = Set<AnyCancellable>()
     
+    // Timer management for animation.
+    private var animationTimers: [UUID: Timer] = [:]
+    
+    // How many sections are still running animations.
+    private var activeSectionsCount: Int = 0
+    
+    // Used to avoid processing the same recognized word repeatedly.
     private var lastCapturedWord: String?
+
+    // MARK: - Initializer
 
     init(
         synthesizer: WordSynthesizing = WordSynthesizer(),
@@ -37,10 +46,12 @@ final class WordGameViewModel: ObservableObject {
         self.wordsArray = words
         self.words = words.map(generateWords)
         self.finishedWords = Array(repeating: [], count: words.count)
-        bind()
+        bindSpeechListener()
     }
     
-    func bind() {
+    // MARK: - Binding
+    
+    func bindSpeechListener() {
         guard let speechListener = self.speechListener as? SpeechRecognizer else {
             return
         }
@@ -48,29 +59,29 @@ final class WordGameViewModel: ObservableObject {
         speechListener.$word
             .compactMap { $0 }
             .sink { [weak self] recognizedWord in
-                guard let self else { return }
-                if let last = lastCapturedWord, last.lowercased() == recognizedWord.lowercased() {
-                    return
-                }
+                guard let self,
+                      !isDuplicate(recognizedWord) else { return }
                 
-                captureWord(recognizedWord)
+                captureWord(for: recognizedWord)
             }
             .store(in: &cancellables)
     }
-    
-    func findMatchingWord(for word: String) -> (sectionIndex: Int, wordIndex: Int)? {
-        words.enumerated().compactMap { (sectionIndex, section) in
-            section
-                .firstIndex { $0.text.lowercased() == word.lowercased() }
-                .map { (sectionIndex, $0) }
+        
+    func isDuplicate(_ recognizedWord: String) -> Bool {
+        if let last = lastCapturedWord, last.lowercased() == recognizedWord.lowercased() {
+            return true
         }
-        .first
+        return false
     }
     
+    // MARK: - Word Generation
+
     func generateWords(section: [String]) -> [Word] {
         section.map { Word(text: $0, animationDuration: Double.random(in: 1...5)) }
     }
     
+    // MARK: - Animation Control
+
     func startAnimation() {
         guard activeSectionsCount == 0 else { return }
         
@@ -80,22 +91,22 @@ final class WordGameViewModel: ObservableObject {
         for section in words.indices {
             if words[section].contains(where: { !$0.isHidden && !$0.isTapped }) {
                 activeSectionsCount += 1
-                animateWord(section)
+                animateNextWord(in: section)
             }
         }
     }
     
-    func animateWord(_ section: Int) {
+    func animateNextWord(in section: Int) {
         if let wordIndex = words[section].firstIndex(where: { !$0.isHidden && !$0.isTapped && !$0.isAnimating } ) {
             let word = words[section][wordIndex]
-            updateWordForAnimation(word: word, section: section, wordIndex: wordIndex)
+            prepareWordForAnimation(word: word, section: section, wordIndex: wordIndex)
             scheduleAnimationEnd(word: word, section: section)
         } else {
-            handleSectionAnimationEnd()
+            completeSectionAnimation()
         }
     }
     
-    func updateWordForAnimation(word: Word, section: Int, wordIndex: Int) {
+    func prepareWordForAnimation(word: Word, section: Int, wordIndex: Int) {
         var word = word
         word.isAnimating = true
         word.color = .blue
@@ -110,14 +121,17 @@ final class WordGameViewModel: ObservableObject {
     func scheduleAnimationEnd(word: Word, section: Int) {
         let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            finishWordAnimation(word: word, section: section)
-            animateWord(section)
+            finishAnimation(for: word, in: section)
+            
+            DispatchQueue.main.async {
+                self.animateNextWord(in: section)
+            }
         }
         
         animationTimers[word.id] = timer
     }
     
-    func finishWordAnimation(word: Word, section: Int) {
+    func finishAnimation(for word: Word, in section: Int) {
         if let currentIndex = words[section].firstIndex(where: { $0.id == word.id }) {
             var finishedWord = words[section][currentIndex]
 
@@ -131,6 +145,83 @@ final class WordGameViewModel: ObservableObject {
         }
     }
     
+    func completeSectionAnimation() {
+        activeSectionsCount -= 1
+        if activeSectionsCount <= 0 {
+            stopListening()
+        }
+    }
+    
+    // MARK: - Word Capturing
+    
+    func captureWord(for recognizedWord: String) {
+        if let (sectionIndex, wordIndex) = findMatchingWord(for: recognizedWord) {
+            var captured = words[sectionIndex][wordIndex]
+            captured.isHidden = true
+            captured.isTapped = true
+            
+            words[sectionIndex][wordIndex] = captured
+            
+            capturedWords.insert(captured)
+            
+            lastCapturedWord = recognizedWord
+            
+            self.speakWord(recognizedWord)
+            
+            DispatchQueue.main.async{
+                self.animateNextWord(in: sectionIndex)
+            }
+        }
+    }
+    
+    func findMatchingWord(for word: String) -> (sectionIndex: Int, wordIndex: Int)? {
+        words.enumerated().compactMap { (sectionIndex, section) in
+            section
+                .firstIndex { $0.text.lowercased() == word.lowercased() }
+                .map { (sectionIndex, $0) }
+        }
+        .first
+    }
+    
+    func handleTapWord(_ tappedWord: Word) {
+        guard tappedWord.isAnimating else { return }
+        
+        if let timer = animationTimers[tappedWord.id] {
+            timer.invalidate()
+            animationTimers.removeValue(forKey: tappedWord.id)
+        }
+        
+        captureWord(for: tappedWord.text)
+    }
+    
+    // MARK: - Speech & Synthesis
+    
+    func speakWord(_ text: String) {
+        stopListening()
+        
+        synthesizer.didFinishSpeaking = { [weak self] in
+            self?.startListening()
+        }
+        
+        self.synthesizer.speak(text)
+    }
+    
+    // MARK: - Listening Control
+    
+    func startListening() {
+        speechListener.startListening()
+    }
+        
+    func stopListening() {
+        speechListener.stopListening()
+    }
+    
+    // MARK: - Utilities
+    
+    func setScreenWidth(_ width: CGFloat) {
+        self.screenWidth = width
+    }
+    
     func resetAnimation() {
         for timer in animationTimers.values {
             timer.invalidate()
@@ -142,63 +233,5 @@ final class WordGameViewModel: ObservableObject {
         capturedWords.removeAll()
         words = wordsArray.map(generateWords)
         activeSectionsCount = 0
-    }
-    
-    func handleTapWord(_ tappedWord: Word) {
-        guard tappedWord.isAnimating else { return }
-        
-        if let timer = animationTimers[tappedWord.id] {
-            timer.invalidate()
-            animationTimers.removeValue(forKey: tappedWord.id)
-        }
-        
-        captureWord(tappedWord.text)
-    }
-    
-    func captureWord(_ wordText: String) {
-        if let (sectionIndex, wordIndex) = findMatchingWord(for: wordText) {
-            var captured = words[sectionIndex][wordIndex]
-            captured.isHidden = true
-            captured.isTapped = true
-            
-            words[sectionIndex][wordIndex] = captured
-            
-            capturedWords.insert(captured)
-            
-            speakWord(wordText)
-            
-            lastCapturedWord = wordText
-            
-            animateWord(sectionIndex)
-        }
-    }
-    
-    func handleSectionAnimationEnd() {
-        activeSectionsCount -= 1
-        if activeSectionsCount <= 0 {
-            stopListening()
-        }
-    }
-    
-    func speakWord(_ text: String) {
-        stopListening()
-        
-        synthesizer.didFinishSpeaking = { [weak self] in
-            self?.startListening()
-        }
-        
-        synthesizer.speak(text)
-    }
-    
-    func startListening() {
-        speechListener.startListening()
-    }
-        
-    func stopListening() {
-        speechListener.stopListening()
-    }
-    
-    func setScreenWidth(_ width: CGFloat) {
-        self.screenWidth = width
     }
 }

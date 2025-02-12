@@ -16,18 +16,25 @@ protocol WordSynthesizing: AnyObject {
 final class WordSynthesizer: NSObject, WordSynthesizing, AVSpeechSynthesizerDelegate {
     
     private let speechSynthesizer = AVSpeechSynthesizer()
-    
+        
+    private let defaultVoice: AVSpeechSynthesisVoice? = AVSpeechSynthesisVoice(language: "en-US")
+        
     var didFinishSpeaking: (() -> Void)?
     
     override init() {
         super.init()
         speechSynthesizer.delegate = self
     }
-
+    
+    private func makeUtterance(with text: String) -> AVSpeechUtterance {
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = defaultVoice
+        return utterance
+    }
+    
     func speak(_ text: String) {
         speechSynthesizer.stopSpeaking(at: .immediate)
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        let utterance = makeUtterance(with: text)
         speechSynthesizer.speak(utterance)
     }
     
