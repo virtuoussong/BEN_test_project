@@ -46,21 +46,14 @@ Below is a Mermaid diagram illustrating the interactions between the key compone
 
 ```mermaid
 graph TD;
-    A[WordGameView]
-    B[WordListView]
-    C[WordGameViewModel]
-    D[SpeechRecognizer (SpeechRecognizing)]
-    E[WordSynthesizer (WordSynthesizing)]
-    F[Word Model]
-
-    A --> B
-    B --> C
-    C --> D
-    C --> E
-    C --> F
-    D -- Publishes recognized word --> C
-    C -- Calls "speak" --> E
-    C -- Updates state & animations --> F
+    A[WordGameView] --> B[WordListView]
+    B[WordListView] --> C[WordGameViewModel]
+    C[WordGameViewModel] --> D[SpeechRecognizer (SpeechRecognizing)]
+    C[WordGameViewModel] --> E[WordSynthesizer (WordSynthesizing)]
+    C[WordGameViewModel] --> F[Word Model]
+    D[SpeechRecognizer (SpeechRecognizing)] -- Publishes recognized word --> C[WordGameViewModel]
+    C[WordGameViewModel] -- Calls "speak" --> E[WordSynthesizer (WordSynthesizing)]
+    C[WordGameViewModel] -- Updates state & animations --> F[Word Model]
 ```
 
 ## Main Components
