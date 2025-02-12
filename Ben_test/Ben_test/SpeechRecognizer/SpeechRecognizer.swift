@@ -13,6 +13,7 @@ protocol SpeechRecognizing: AnyObject {
     func startListening()
     func stopListening()
     var word: String? { get set }
+    var wordPublisher: AnyPublisher<String?, Never> { get }
 }
 
 final class SpeechRecognizer: SpeechRecognizing {
@@ -22,6 +23,10 @@ final class SpeechRecognizer: SpeechRecognizing {
     private let speechRecognizer: SFSpeechRecognizer? = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     
     @Published var word: String?
+    
+    var wordPublisher: AnyPublisher<String?, Never> {
+        $word.eraseToAnyPublisher()
+    }
     
     init() {
         askPermission()

@@ -52,11 +52,7 @@ final class WordGameViewModel: ObservableObject {
     // MARK: - Binding
     
     private func bindSpeechListener() {
-        guard let speechListener = self.speechListener as? SpeechRecognizer else {
-            return
-        }
-        
-        speechListener.$word
+        speechListener.wordPublisher
             .compactMap { $0 }
             .sink { [weak self] recognizedWord in
                 guard let self,
