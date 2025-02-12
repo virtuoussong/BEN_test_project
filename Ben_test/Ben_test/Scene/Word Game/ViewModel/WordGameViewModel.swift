@@ -72,6 +72,8 @@ final class WordGameViewModel: ObservableObject {
     }
     
     func startAnimation() {
+        guard activeSectionsCount == 0 else { return }
+        
         activeSectionsCount = 0
         startListening()
         
@@ -139,6 +141,7 @@ final class WordGameViewModel: ObservableObject {
         finishedWords = Array(repeating: [], count: words.count)
         capturedWords.removeAll()
         words = wordsArray.map(generateWords)
+        activeSectionsCount = 0
     }
     
     func handleTapWord(_ tappedWord: Word) {

@@ -12,37 +12,17 @@ struct WordGameBottomButtonView: View {
     
     var body: some View {
         HStack {
-            Button(action: {
-                viewModel.startAnimation()
-            }) {
-                Text("Start")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    
-            }
-            .frame(maxWidth: .infinity)
-            .background(Color.blue)
-            .cornerRadius(8)
+            BottomButtomView(text: "Start", tap: viewModel.startAnimation)
             
             Spacer()
                 .frame(width: 16)
             
-            Button(action: {
-                viewModel.resetAnimation()
-            }) {
-                Text("Reset")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-            }
-            .frame(maxWidth: .infinity)
-            .background(Color.blue)
-            .cornerRadius(8)
+            BottomButtomView(text: "Reset", tap: viewModel.resetAnimation)
         }
     }
 }
 
 #Preview {
     WordGameBottomButtonView()
+        .environmentObject(WordGameViewModel(words: [["a", "b"], ["c", "d"]]))
 }

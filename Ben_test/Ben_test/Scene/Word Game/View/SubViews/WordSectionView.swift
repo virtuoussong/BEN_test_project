@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct WordSectionView: View {
-    @EnvironmentObject var viewModel: WordGameViewModel
-    
-    let sectionIndex: Int
+    @Binding var words: [Word]
+    @Binding var finishedWords: [Word]
+    var tap: (Word) -> Void
     
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
-                ForEach($viewModel.words[sectionIndex]) { $word in
+                ForEach($words) { $word in
                     WordButtonView(word: $word) {
-                        viewModel.handleTapWord(word)
+                        tap(word)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .listRowInsets(EdgeInsets())
@@ -25,17 +25,16 @@ struct WordSectionView: View {
             }
             
             VStack(alignment: .trailing, spacing: 8) {
-                ForEach($viewModel.finishedWords[sectionIndex]) { $word in
+                ForEach($finishedWords) { $word in
                     FinishedWordView(word: $word)
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.finishedWords[sectionIndex])
+        .animation(.easeInOut(duration: 0.3), value: finishedWords)
     }
 }
 
 #Preview {
-    WordSectionView(sectionIndex: 0)
-        .environmentObject(WordGameViewModel(words: [["a", "b"], ["c", "d"]]))
+    WordSectionView(words: .constant([]), finishedWords: .constant([]), tap: { _ in })
 }

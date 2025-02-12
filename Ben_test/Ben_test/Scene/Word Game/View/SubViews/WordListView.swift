@@ -15,7 +15,12 @@ struct WordListView: View {
             ScrollView(.vertical) {
                 VStack(spacing: 24) {
                     ForEach(viewModel.words.indices, id: \.self) { sectionIndex in
-                        WordSectionView(sectionIndex: sectionIndex)
+                        WordSectionView(
+                            words: $viewModel.words[sectionIndex],
+                            finishedWords: $viewModel.finishedWords[sectionIndex]
+                        ) { word in
+                            viewModel.handleTapWord(word)
+                        }
                     }
                 }
                 .onAppear {
@@ -23,7 +28,6 @@ struct WordListView: View {
                 }
             }
         }
-        .environmentObject(viewModel)
     }
 }
 
