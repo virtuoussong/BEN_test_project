@@ -13,9 +13,10 @@ protocol SpeechRecognizing: AnyObject {
     func startListening()
     func stopListening()
     var word: String? { get set }
+    var wordPublisher: AnyPublisher<String?, Never> { get }
 }
 
-class SpeechRecognizer: SpeechRecognizing {
+final class SpeechRecognizer: SpeechRecognizing {
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
@@ -23,11 +24,15 @@ class SpeechRecognizer: SpeechRecognizing {
     
     @Published var word: String?
     
+    var wordPublisher: AnyPublisher<String?, Never> {
+        $word.eraseToAnyPublisher()
+    }
+    
     init() {
         askPermission()
     }
     
-    func askPermission() {
+    private func askPermission() {
         AVAudioApplication.requestRecordPermission { granted in
             if granted {
                 print("Microphone permission granted")
@@ -54,18 +59,7 @@ class SpeechRecognizer: SpeechRecognizing {
         }
     }
     
-    func startListening() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            DispatchQueue.main.async {
-                guard authStatus == .authorized else {
-                    return
-                }
-                self.startAudioEngine()
-            }
-        }
-    }
-    
-    func startAudioEngine() {
+    private func startAudioEngine() {
         recognitionTask?.cancel()
         recognitionTask = nil
         
@@ -115,6 +109,18 @@ class SpeechRecognizer: SpeechRecognizing {
             }
         )
     }
+    
+    func startListening() {
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            DispatchQueue.main.async {
+                guard authStatus == .authorized else {
+                    return
+                }
+                self.startAudioEngine()
+            }
+        }
+    }
+    
     
     func stopListening() {
         if audioEngine.isRunning {
