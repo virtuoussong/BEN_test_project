@@ -80,45 +80,47 @@ final class WordGameViewModel: ObservableObject {
     }
     
     func animateWord(_ section: Int) {
-        if let wordIndex = words[section].firstIndex(
-            where: { !$0.isHidden && !$0.isTapped && !$0.isAnimating }
-        ) {
-            var word = words[section][wordIndex]
-            word.isAnimating = true
-            word.color = .blue
-            
-            withTransaction(Transaction(animation: nil)) {
-                words[section][wordIndex] = word
-            }
-            
-            words[section][wordIndex].offSetX = screenWidth - 150
-            
-            let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                
-                if let currentIndex = self.words[section].firstIndex(where: { $0.id == word.id }) {
-                    var finishedWord = self.words[section][currentIndex]
-
-                    if !finishedWord.isTapped {
-                        finishedWord.isHidden = true
-                        finishedWord.isAnimating = false
-                        self.finishedWords[section].append(finishedWord)
-                        self.words[section][currentIndex] = finishedWord
-                    }
-                }
-
-                self.animateWord(section)
-            }
-            
-            animationTimers[word.id] = timer
-            
+        if let wordIndex = words[section].firstIndex(where: { !$0.isHidden && !$0.isTapped && !$0.isAnimating } ) {
+            let word = words[section][wordIndex]
+            updateWordForAnimation(word: word, section: section, wordIndex: wordIndex)
+            scheduleAnimationEnd(word: word, section: section)
         } else {
-            activeSectionsCount -= 1
-            
-            if activeSectionsCount <= 0 {
-                stopListening()
-            }
+            handleAnimationEnd()
         }
+    }
+    
+    func updateWordForAnimation(word: Word, section: Int, wordIndex: Int) {
+        var word = word
+        word.isAnimating = true
+        word.color = .blue
+        
+        withTransaction(Transaction(animation: nil)) {
+            words[section][wordIndex] = word
+        }
+        
+        words[section][wordIndex].offSetX = screenWidth - 150
+    }
+    
+    func scheduleAnimationEnd(word: Word, section: Int) {
+        let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            
+            if let currentIndex = self.words[section].firstIndex(where: { $0.id == word.id }) {
+                var finishedWord = self.words[section][currentIndex]
+
+                if !finishedWord.isTapped {
+                    finishedWord.isHidden = true
+                    finishedWord.isAnimating = false
+                    
+                    self.finishedWords[section].append(finishedWord)
+                    self.words[section][currentIndex] = finishedWord
+                }
+            }
+
+            self.animateWord(section)
+        }
+        
+        animationTimers[word.id] = timer
     }
     
     func resetAnimation() {
@@ -152,11 +154,21 @@ final class WordGameViewModel: ObservableObject {
                 capturedWords.insert(captured)
                 speakWord(tappedWord.text)
                 lastCapturedWord = tappedWord.text
+                
+                animateWord(sectionIndex)
+                
                 return
             }
         }
         
         speakWord(tappedWord.text)
+    }
+    
+    func handleAnimationEnd() {
+        activeSectionsCount -= 1
+        if activeSectionsCount <= 0 {
+            stopListening()
+        }
     }
     
     func speakWord(_ text: String) {
