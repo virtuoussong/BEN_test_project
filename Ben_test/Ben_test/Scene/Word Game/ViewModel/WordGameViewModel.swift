@@ -7,25 +7,60 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 final class WordGameViewModel: ObservableObject {
     @Published var words: [[Word]] = []
     @Published var finishedWords: [[Word]] = []
-    @Published var capturedWords: [Word] = []
+    @Published var capturedWords: Set<Word> = []
+    
     private var animationTimers: [UUID: Timer] = [:]
     private var activeSectionsCount: Int = 0
-    let synthesizer: WordSynthesizing
+    
     let wordsArray: [[String]]
     var screenWidth: CGFloat = 0
     
+    let synthesizer: WordSynthesizing
+    let speechListener: SpeechRecognizer
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    private var lastCapturedWord: String?
+
     init(
         synthesizer: WordSynthesizing = WordSynthesizer(),
+        listner: SpeechRecognizer = SpeechRecognizer(),
         words: [[String]]
     ) {
         self.synthesizer = synthesizer
+        self.speechListener = listner
         self.wordsArray = words
         self.words = words.map(generateWords)
         self.finishedWords = Array(repeating: [], count: words.count)
+        bind()
+    }
+    
+    func bind() {
+        speechListener.$word
+            .compactMap { $0 }
+            .sink { [weak self] recognizedWord in
+                guard let self else { return }
+                if let last = self.lastCapturedWord, last.lowercased() == recognizedWord.lowercased() {
+                    return
+                }
+                
+                if let (sectionIndex, wordIndex) = self.words
+                    .enumerated()
+                    .compactMap({ sectionIndex, section in
+                        section.firstIndex(where: { $0.text.lowercased() == recognizedWord.lowercased() })
+                        .map { (sectionIndex, $0) }
+                    })
+                    .first {
+                        let matchedWord = self.words[sectionIndex][wordIndex]
+                        self.handleTapWord(matchedWord)
+                    }
+            }
+            .store(in: &cancellables)
     }
     
     func generateWords(section: [String]) -> [Word] {
@@ -74,10 +109,12 @@ final class WordGameViewModel: ObservableObject {
 
                 self.animateWord(section)
             }
+            
             animationTimers[word.id] = timer
             
         } else {
             activeSectionsCount -= 1
+            
             if activeSectionsCount <= 0 {
                 stopListening()
             }
@@ -112,8 +149,9 @@ final class WordGameViewModel: ObservableObject {
                 
                 words[sectionIndex][index] = captured
                 
-                capturedWords.append(captured)
+                capturedWords.insert(captured)
                 speakWord(tappedWord.text)
+                lastCapturedWord = tappedWord.text
                 return
             }
         }
@@ -130,10 +168,10 @@ final class WordGameViewModel: ObservableObject {
     }
     
     func startListening() {
-        print("Started listening for speech input...")
+        speechListener.startListening()
     }
         
     func stopListening() {
-        print("Stopped listening for speech input.")
+        speechListener.stopListening()
     }
 }

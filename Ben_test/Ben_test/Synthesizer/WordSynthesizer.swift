@@ -11,6 +11,7 @@ import AVFoundation
 protocol WordSynthesizing {
     func speak(_ text: String)
 }
+
 final class WordSynthesizer: WordSynthesizing {
     
     private let speechSynthesizer = AVSpeechSynthesizer()

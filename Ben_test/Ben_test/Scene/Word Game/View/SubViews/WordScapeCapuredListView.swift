@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WordScapeCapuredListView: View {
     
-    @Binding var words: [Word]
+    @Binding var words: Set<Word>
     
     var body: some View {
         Text(words.map{ $0.text }.joined(separator: ", "))
