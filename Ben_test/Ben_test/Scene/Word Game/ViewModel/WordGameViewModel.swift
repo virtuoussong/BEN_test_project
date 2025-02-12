@@ -51,7 +51,7 @@ final class WordGameViewModel: ObservableObject {
     
     // MARK: - Binding
     
-    func bindSpeechListener() {
+    private func bindSpeechListener() {
         guard let speechListener = self.speechListener as? SpeechRecognizer else {
             return
         }
@@ -67,7 +67,7 @@ final class WordGameViewModel: ObservableObject {
             .store(in: &cancellables)
     }
         
-    func isDuplicate(_ recognizedWord: String) -> Bool {
+    private func isDuplicate(_ recognizedWord: String) -> Bool {
         if let last = lastCapturedWord, last.lowercased() == recognizedWord.lowercased() {
             return true
         }
@@ -76,7 +76,7 @@ final class WordGameViewModel: ObservableObject {
     
     // MARK: - Word Generation
 
-    func generateWords(section: [String]) -> [Word] {
+    private func generateWords(section: [String]) -> [Word] {
         section.map { Word(text: $0, animationDuration: Double.random(in: 1...5)) }
     }
     
@@ -96,7 +96,7 @@ final class WordGameViewModel: ObservableObject {
         }
     }
     
-    func animateNextWord(in section: Int) {
+    private func animateNextWord(in section: Int) {
         if let wordIndex = words[section].firstIndex(where: { !$0.isHidden && !$0.isTapped && !$0.isAnimating } ) {
             let word = words[section][wordIndex]
             prepareWordForAnimation(word: word, section: section, wordIndex: wordIndex)
@@ -106,7 +106,7 @@ final class WordGameViewModel: ObservableObject {
         }
     }
     
-    func prepareWordForAnimation(word: Word, section: Int, wordIndex: Int) {
+    private func prepareWordForAnimation(word: Word, section: Int, wordIndex: Int) {
         var word = word
         word.isAnimating = true
         word.color = .blue
@@ -118,7 +118,7 @@ final class WordGameViewModel: ObservableObject {
         words[section][wordIndex].offSetX = screenWidth - 150
     }
     
-    func scheduleAnimationEnd(word: Word, section: Int) {
+    private func scheduleAnimationEnd(word: Word, section: Int) {
         let timer = Timer.scheduledTimer(withTimeInterval: word.animationDuration, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             finishAnimation(for: word, in: section)
@@ -131,7 +131,7 @@ final class WordGameViewModel: ObservableObject {
         animationTimers[word.id] = timer
     }
     
-    func finishAnimation(for word: Word, in section: Int) {
+    private func finishAnimation(for word: Word, in section: Int) {
         if let currentIndex = words[section].firstIndex(where: { $0.id == word.id }) {
             var finishedWord = words[section][currentIndex]
 
@@ -145,7 +145,7 @@ final class WordGameViewModel: ObservableObject {
         }
     }
     
-    func completeSectionAnimation() {
+    private func completeSectionAnimation() {
         activeSectionsCount -= 1
         if activeSectionsCount <= 0 {
             stopListening()
@@ -154,7 +154,7 @@ final class WordGameViewModel: ObservableObject {
     
     // MARK: - Word Capturing
     
-    func captureWord(for recognizedWord: String) {
+    private func captureWord(for recognizedWord: String) {
         if let (sectionIndex, wordIndex) = findMatchingWord(for: recognizedWord) {
             var captured = words[sectionIndex][wordIndex]
             captured.isHidden = true
@@ -174,7 +174,7 @@ final class WordGameViewModel: ObservableObject {
         }
     }
     
-    func findMatchingWord(for word: String) -> (sectionIndex: Int, wordIndex: Int)? {
+    private func findMatchingWord(for word: String) -> (sectionIndex: Int, wordIndex: Int)? {
         words.enumerated().compactMap { (sectionIndex, section) in
             section
                 .firstIndex { $0.text.lowercased() == word.lowercased() }
@@ -196,7 +196,7 @@ final class WordGameViewModel: ObservableObject {
     
     // MARK: - Speech & Synthesis
     
-    func speakWord(_ text: String) {
+    private func speakWord(_ text: String) {
         stopListening()
         
         synthesizer.didFinishSpeaking = { [weak self] in
@@ -208,11 +208,11 @@ final class WordGameViewModel: ObservableObject {
     
     // MARK: - Listening Control
     
-    func startListening() {
+    private func startListening() {
         speechListener.startListening()
     }
         
-    func stopListening() {
+    private func stopListening() {
         speechListener.stopListening()
     }
     
