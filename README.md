@@ -45,7 +45,7 @@ The project is organized into several layers:
 Below is a Mermaid diagram illustrating the interactions between the key components:
 
 ```mermaid
-graph TD
+graph TD;
     A[WordGameView]
     B[WordListView]
     C[WordGameViewModel]
