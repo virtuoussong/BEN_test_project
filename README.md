@@ -48,8 +48,8 @@ graph TD
     A[WordGameView]
     B[WordListView]
     C[WordGameViewModel]
-    D[SpeechRecognizer<br/>(SpeechRecognizing)]
-    E[WordSynthesizer<br/>(WordSynthesizing)]
+    D[SpeechRecognizer\n(SpeechRecognizing)]
+    E[WordSynthesizer\n(WordSynthesizing)]
     F[Word Model]
     
     A --> B
