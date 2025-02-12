@@ -7,10 +7,12 @@
 
 import Foundation
 import Speech
+import Combine
 
 protocol SpeechRecognizing: AnyObject {
     func startListening()
     func stopListening()
+    var word: String? { get set }
 }
 
 class SpeechRecognizer: SpeechRecognizing {
@@ -75,13 +77,16 @@ class SpeechRecognizer: SpeechRecognizing {
         recognitionRequest.shouldReportPartialResults = true
         
         let inputNode = audioEngine.inputNode
+        
         inputNode.removeTap(onBus: 0)
+        
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
             recognitionRequest.append(buffer)
         }
         
         audioEngine.prepare()
+        
         do {
             try audioEngine.start()
         } catch {
@@ -97,7 +102,9 @@ class SpeechRecognizer: SpeechRecognizing {
                 if let result = result {
                     if let lastSegment = result.bestTranscription.segments.last {
                         let recognizedWord = lastSegment.substring
+                        #if DEBUG
                         print("Recognized word: \(recognizedWord)")
+                        #endif
                         word = recognizedWord
                     }
                 }
@@ -117,5 +124,6 @@ class SpeechRecognizer: SpeechRecognizing {
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
         recognitionTask = nil
+        recognitionRequest = nil
     }
 }
