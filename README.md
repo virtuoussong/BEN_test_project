@@ -3,8 +3,6 @@ test project
 
 [![CI](https://github.com/virtuoussong/BEN_test_project/actions/workflows/swift-test.yml/badge.svg)](https://github.com/virtuoussong/BEN_test_project/actions/workflows/swift-test.yml)
 
-# Ben_test
-
 Ben_test is a SwiftUI-based word game app that integrates speech recognition and speech synthesis to capture, animate, and speak words. The app displays words in sections, animates them from left to right, and uses speech input to capture words. It follows clean architecture and SOLID principles to improve testability and maintainability.
 
 ## Table of Contents
@@ -62,3 +60,4 @@ graph TD
     D -- Publishes recognized word --> C
     C -- Calls "speak" --> E
     C -- Updates state & animations --> F
+```
