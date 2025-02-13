@@ -33,6 +33,13 @@ jobs:
     - name: List Available SDKs
       run: xcodebuild -showsdks
 
+    - name: Show Valid Destinations for "CI" Scheme
+      working-directory: ./Ben_test
+      run: |
+        xcodebuild -scheme "CI" \
+          -destination 'platform=iOS Simulator,OS=18.2,name=iPhone 16' \
+          -showdestinations
+
     - name: Build and test
       working-directory: ./Ben_test
       run: | 
