@@ -38,5 +38,5 @@ jobs:
         -project Ben_test.xcodeproj \
         -scheme "CI" \
         CODE_SIGN_IDENTITY="" \
-        -destination 'platform=iOS Simulator, id=3085A5AB-2343-47F3-B51D-30AD7E435523, OS=18.2, name=iPhone 16'
+        -destination 'platform=iOS Simulator, OS=18.2, name=iPhone 16'
 
