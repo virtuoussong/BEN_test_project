@@ -11,14 +11,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Select Xcode
-      uses: maxim-lobanov/setup-xcode@v2
-      with: 
-        xcode-version: '14.3.1'
-      
-    - name: Xcode version
-      run: /usr/bin/xcodebuild -version
     
     - name: Build and test
       run: xcodebuild clean build test -project BEN_test_project/BEN_test.xcodeproj -scheme "CI" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' -quiet
