@@ -26,6 +26,9 @@ jobs:
 
     - name: List Available Simulators
       run: xcrun simctl list devices
+  
+    - name: Show Valid Destinations
+      run: xcodebuild -scheme "CI" -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 16' -showdestinations
       
     - name: Build and test
       run: | 
