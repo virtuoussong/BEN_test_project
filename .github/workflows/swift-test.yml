@@ -33,7 +33,7 @@ jobs:
     - name: Build and test
       run: | 
         xcodebuild clean build test \
-        -project "./Ben_test/Ben_test.xcodeproj" \
+        -project Ben_test/Ben_test.xcodeproj \
         -scheme "CI" \
         CODE_SIGN_IDENTITY="" \
         -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 16'
