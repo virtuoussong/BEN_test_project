@@ -38,6 +38,4 @@ jobs:
         -project Ben_test.xcodeproj \
         -scheme "CI" \
         CODE_SIGN_IDENTITY="" \
-        -sdk macosx \
-        -destination "platform=macOS" ONLY_ACTIVE_ARCH=YES
-
+        -sdk macosx 
