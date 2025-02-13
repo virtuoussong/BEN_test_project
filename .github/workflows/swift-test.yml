@@ -42,5 +42,5 @@ jobs:
         CODE_SIGN_IDENTITY="" \
         CODE_SIGNING_REQUIRED=NO \
         -sdk iphonesimulator \
-        -destination 'platform=iOS Simulator,OS=18.2,name=iPhone 16' \
+        -destination 'id=3085A5AB-2343-47F3-B51D-30AD7E435523' \
         ONLY_ACTIVE_ARCH=YES
