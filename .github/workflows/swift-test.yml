@@ -39,5 +39,5 @@ jobs:
         -scheme "CI" \
         CODE_SIGN_IDENTITY="" \
         -sdk macosx \
-        -destination "platform=macOS"
+        -destination "platform=macOS" ONLY_ACTIVE_ARCH=YES
 
