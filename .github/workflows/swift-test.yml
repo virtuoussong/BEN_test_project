@@ -29,7 +29,7 @@ jobs:
   
     - name: Show Valid Destinations
       working-directory: ./Ben_test
-      run: xcodebuild -scheme "CI" -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 16' -showdestinations
+      run: xcodebuild -scheme "CI" -destination 'platform=iOS Simulator,OS=17,name=iPhone 15' -showdestinations
       
     - name: Build and test
       working-directory: ./Ben_test
