@@ -26,6 +26,9 @@ jobs:
 
     - name: List Available Simulators
       run: xcrun simctl list devices
+
+    - name: List shared schemes
+      run: find . -name "CI.xcscheme"
   
     - name: Show Valid Destinations
       working-directory: ./Ben_test
