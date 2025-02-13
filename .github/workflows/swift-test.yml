@@ -33,6 +33,9 @@ jobs:
     - name: Show Valid Destinations
       working-directory: ./Ben_test
       run: xcodebuild -scheme "CI" -destination 'platform=iOS Simulator,OS=18.2,name=iPhone 16' -showdestinations
+
+    - name: Clean Derived Data
+      run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
       
     - name: Build and test
       working-directory: ./Ben_test
