@@ -25,7 +25,7 @@ jobs:
       run: /usr/bin/xcodebuild -version
 
     - name: List Available Simulators
-      run: xcrun simctl list devices
+      run: xcrun simctl list runtimes
 
     - name: List shared schemes
       run: find . -name "CI.xcscheme"
