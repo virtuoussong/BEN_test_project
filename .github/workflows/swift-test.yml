@@ -10,7 +10,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: List available Xcode versions
       run: ls /Applications | grep Xcode
@@ -28,6 +28,7 @@ jobs:
       run: xcrun simctl list devices
   
     - name: Show Valid Destinations
+      working-directory: ./Ben_test
       run: xcodebuild -scheme "CI" -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 16' -showdestinations
       
     - name: Build and test
