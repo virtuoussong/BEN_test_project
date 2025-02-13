@@ -25,11 +25,14 @@ jobs:
       run: /usr/bin/xcodebuild -version
 
     - name: List Available Simulators
+      run: xcrun simctl list devices
+
+    - name: List Available Runtimes
       run: xcrun simctl list runtimes
 
-    - name: List shared schemes
-      run: find . -name "CI.xcscheme"
-      
+    - name: List Available SDKs
+      run: xcodebuild -showsdks
+
     - name: Build and test
       working-directory: ./Ben_test
       run: | 
