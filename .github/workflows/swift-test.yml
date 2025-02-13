@@ -38,5 +38,5 @@ jobs:
         -project Ben_test.xcodeproj \
         -scheme "CI" \
         CODE_SIGN_IDENTITY="" \
-        -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 16'
+        -destination 'platform=iOS Simulator,OS=18.1,name=iPhone 15'
 
