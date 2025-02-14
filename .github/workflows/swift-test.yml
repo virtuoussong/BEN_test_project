@@ -24,6 +24,9 @@ jobs:
     - name: Xcode version
       run: /usr/bin/xcodebuild -version
 
+    - name: Download iOS Simulator Runtime
+      run: sudo xcodebuild -downloadPlatform iOS -exportPath ./ios_runtime
+
     - name: List Available Simulators
       run: xcrun simctl list devices
 
